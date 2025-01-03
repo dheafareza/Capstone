@@ -150,42 +150,71 @@ require ('sidebar.php'); ?>
         <div class="col-lg-6 mb-4">
 
 <!-- Catatan Card Example -->
-<div class="card shadow mb-4">
-  <div class="card-header py-3">
-    <h6 class="m-0 font-weight-bold text-primary">Catatan</h6>
-  </div>
-  <div class="card-body">
-            <!-- Button Tambah Catatan -->
-            <button type="button" class="btn btn-success mb-3" data-toggle="modal" data-target="#modalTambahCatatan">
-      <i class="fa fa-plus"></i> Tambah Catatan
-    </button>
-    <div class="table-responsive">
-      <table class="table table-bordered" id="dataTableCatatan" width="100%" cellspacing="0">
-        <thead>
-          <tr>
-            <th>No.</th>
-            <th>Catatan</th>
-            <th>Aksi</th>
-          </tr>
-        </thead>
-        <tbody>
-        <?php
-        $queryCatatan = mysqli_query($koneksi, "SELECT * FROM catatan");
-        while ($dataCatatan = mysqli_fetch_assoc($queryCatatan)) {
-          echo "<tr>";
-          echo "<td>" . $dataCatatan['id_catatan'] . "</td>";
-          echo "<td>" . $dataCatatan['catatan'] . "</td>";
-          echo "<td>";
-          echo "<button class='btn btn-warning btn-sm' data-toggle='modal' data-target='#modalEditCatatan" . $dataCatatan['id_catatan'] . "'>Edit</button>";
-          echo "</td>";
-          echo "</tr>";
-        }
-        ?>
-        </tbody>
-      </table>
+<div class="container mt-4">
+  <!-- Button Tambah Catatan -->
+  <button type="button" class="btn btn-success mb-3" data-toggle="modal" data-target="#modalTambahCatatan">
+    <i class="fa fa-plus"></i> Tambah Catatan
+  </button>
+
+  <!-- Catatan List -->
+  <?php
+  $queryCatatan = mysqli_query($koneksi, "SELECT * FROM catatan");
+  if (mysqli_num_rows($queryCatatan) > 0) {
+    while ($dataCatatan = mysqli_fetch_assoc($queryCatatan)) {
+  ?>
+    <div class="card shadow mb-3">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+                  <h6 class="font-weight-bold text-primary">Catatan <?php echo $dataCatatan['id_catatan']; ?></h6>
+          <!-- Dropdown untuk Edit dan Hapus -->
+          <div class="dropdown">
+            <button class="btn btn-link dropdown-toggle text-secondary p-0" type="button" id="dropdownMenu<?php echo $dataCatatan['id_catatan']; ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <i class="fa fa-ellipsis-v"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu<?php echo $dataCatatan['id_catatan']; ?>">
+              <button class="dropdown-item" data-toggle="modal" data-target="#modalEditCatatan<?php echo $dataCatatan['id_catatan']; ?>">Edit</button>
+              <button class="dropdown-item text-danger" onclick="hapusCatatan(<?php echo $dataCatatan['id_catatan']; ?>)">Hapus</button>
+            </div>
+          </div>
+        </div>
+        <p><?php echo $dataCatatan['catatan']; ?></p>
+      </div>
     </div>
-  </div>
+
+    <!-- Modal Edit Catatan -->
+    <div class="modal fade" id="modalEditCatatan<?php echo $dataCatatan['id_catatan']; ?>" tabindex="-1" role="dialog" aria-labelledby="modalEditCatatanLabel<?php echo $dataCatatan['id_catatan']; ?>" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalEditCatatanLabel<?php echo $dataCatatan['id_catatan']; ?>">Edit Catatan</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <form action="edit_catatan.php" method="POST">
+            <div class="modal-body">
+              <input type="hidden" name="id_catatan" value="<?php echo $dataCatatan['id_catatan']; ?>">
+              <div class="form-group">
+                <label for="catatan">Catatan</label>
+                <textarea class="form-control" id="catatan" name="catatan" rows="3" required><?php echo $dataCatatan['catatan']; ?></textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+              <button type="submit" class="btn btn-primary">Simpan</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  <?php
+    }
+  } else {
+    echo "<p class='text-muted'>Belum ada catatan.</p>";
+  }
+  ?>
 </div>
+
 <!-- Modal Tambah Catatan -->
 <div class="modal fade" id="modalTambahCatatan" tabindex="-1" role="dialog" aria-labelledby="modalTambahCatatanLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
@@ -212,39 +241,6 @@ require ('sidebar.php'); ?>
   </div>
 </div>
 
-<!-- Modal Edit Catatan -->
-<?php
-$queryCatatan = mysqli_query($koneksi, "SELECT * FROM catatan");
-while ($dataCatatan = mysqli_fetch_assoc($queryCatatan)) {
-?>
-<div class="modal fade" id="modalEditCatatan<?php echo $dataCatatan['id_catatan']; ?>" tabindex="-1" role="dialog" aria-labelledby="modalEditCatatanLabel<?php echo $dataCatatan['id_catatan']; ?>" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalEditCatatanLabel<?php echo $dataCatatan['id_catatan']; ?>">Edit Catatan</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <form action="edit_catatan.php" method="POST">
-        <div class="modal-body">
-          <input type="hidden" name="id_catatan" value="<?php echo $dataCatatan['id_catatan']; ?>">
-          <div class="form-group">
-            <label for="catatan">Catatan</label>
-            <textarea class="form-control" id="catatan" name="catatan" rows="3" required><?php echo $dataCatatan['catatan']; ?></textarea>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-          <button type="submit" class="btn btn-primary">Simpan</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-<?php
-}
-?>
 
 </div>
 
